@@ -1,0 +1,37 @@
+services:
+  traefik:
+    image: traefik:v3.2.2
+    container_name: traefik
+    restart: always
+    networks:
+      proxy:
+        ipv4_address: ${TRAEFIK_INTERNAL_NETWORK_ADDR}
+    ports:
+      - 80:80
+      - 443:443
+      - 25:25
+      - 465:465
+      - 993:993
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/traefik:/etc/traefik
+      - acme:/etc/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  traefik-certs-dumper:
+    image: ghcr.io/kereis/traefik-certs-dumper:latest
+    container_name: traefik-certs-dumper
+    restart: unless-stopped
+    depends_on:
+      - traefik
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - acme:/traefik:ro
+      - certs:/output
+
+volumes:
+  acme:
+  certs:
+
+networks:
+  proxy:
