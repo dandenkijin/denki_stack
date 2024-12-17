@@ -8,7 +8,9 @@ services:
       - 9090:9090
     restart: unless-stopped
     volumes:
-      - ./prometheus:/etc/prometheus
+      #- /apps/prometheus/configs/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - /prometheus:/etc/prometheus/prometheus.yaml
       - prom_data:/prometheus
 volumes:
   prom_data:
+    name: prom_data

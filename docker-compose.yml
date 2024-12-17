@@ -2,6 +2,8 @@
 include:
   - path: "docker-compose.networks.yml"
   - path: "traefik/docker-compose.traefik.yml"
+  #- path: "traefik/docker-compose.traefik_stock.yml"
   - path: "stalwart/docker-compose.stalwart.yml"
   - path: "prometheus/docker-compose.prometheus.yml"
   - path: "grafana/docker-compose.grafana.yml"
+  - path: "nginx/docker-compose.nginx.yml"

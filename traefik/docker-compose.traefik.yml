@@ -1,37 +1,69 @@
 services:
   traefik:
-    image: traefik:v3.2.2
+    image: traefik:v3.2.3
     container_name: traefik
+    command:
+      - --metrics.prometheus=true
+      - --metrics.prometheus.addrouterslabels=true
+      - --entrypoints.https=true
+      - --entrypoints.https.address=:443
     restart: always
     networks:
       proxy:
-        ipv4_address: ${TRAEFIK_INTERNAL_NETWORK_ADDR}
+        ipv4_address: 172.20.0.2
     ports:
       - 80:80
       - 443:443
-      - 25:25
       - 465:465
       - 993:993
+      - 1337:1337
+      - 4190:4190
+      #- 8080:8080
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/traefik:/etc/traefik
-      - acme:/etc/certs
+      #- /etc/localtime:/etc/localtime:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.entrypoints=websecure
+      - traefik.http.routers.api.rule=Host(`traefik.denkijin.com`) # && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))# DOMAINNAME
+      - traefik.http.routers.api.service=api@internal
+      - traefik.http.routers.api.middlewares=auth
+      - traefik.http.middlewares.auth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/  # not sure, bcrypt??
+      - traefik.http.services.api.loadbalancer.server.port=1337
 
+  ## BROKEN?? . . . seems to function, other than hook.sh being a directory rather than a script?
   traefik-certs-dumper:
-    image: ghcr.io/kereis/traefik-certs-dumper:latest
-    container_name: traefik-certs-dumper
-    restart: unless-stopped
+    image: ldez/traefik-certs-dumper:v2.8.3
     depends_on:
       - traefik
+    container_name: traefik-certs-dumper
+    entrypoint: sh -c '
+      apk add jq
+      && while ! [ -e /data/acme.json ]
+      || ! [ `jq ".[] | .Certificates | length" /data/acme.json | jq -s "add" ` != 0 ]; do
+      sleep 1
+      ; done
+      && traefik-certs-dumper file --version v2 --watch
+        --source /data/acme.json --dest /data/certs
+        --post-hook "sh /hook.sh"'
+    labels:
+      traefik.enable: false
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - acme:/traefik:ro
-      - certs:/output
-
-volumes:
-  acme:
-  certs:
-
-networks:
-  proxy:
+      - ./letsencrypt:/data
+      - ./hook.sh:/hook.sh
+#  certdumper:
+#    image: ghcr.io/kereis/traefik-certs-dumper:latest
+#    volumes:
+#      - ./letsencrypt:/traefik:ro
+#      - ./letsencrypt/dumped:/output:rw
+  whoami:
+    image: traefik/whoami:v1.8.1
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mywhoami.rule=Host(`whoami.denkijin.com`) #DOMAINNAME
+      - traefik.http.routers.mywhoami.entrypoints=websecure
+      - traefik.http.services.mywhoami.loadbalancer.server.port=80

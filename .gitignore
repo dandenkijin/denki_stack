@@ -1,0 +1,4 @@
+traefik/letsencrypt/
+nginx/logs/
+stalwart/opt/stalwart-mail/etc/certs/
+.env
