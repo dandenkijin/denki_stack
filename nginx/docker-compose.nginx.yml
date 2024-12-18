@@ -2,13 +2,16 @@
 services:
   nginx:
     image: nginx:stable-alpine3.20
-    depends_on: 
-      - traefik
+    #depends_on: 
+    #  - traefik
+    #ports:
+    #  - 80:80
     healthcheck:
-      test: ["CMD", "curl", "localhost:80"]
+      test: ["CMD", "curl", "0.0.0.0:80"]
     labels:
       traefik.enable: true
       traefik.port: 80
+      traefik.http.routers.nginx.service: nginx
       traefik.http.services.nginx.loadbalancer.server.port: 80
       traefik.http.routers.nginx.rule: Host(`denkijin.com`)
       traefik.http.routers.nginx.entrypoints: websecure
@@ -17,7 +20,7 @@ services:
     networks:
       proxy:
         ipv4_address: 172.20.0.6
-      #srv:
+      srv:
     restart: always
     volumes:
       - ./conf:/etc/nginx/conf.d

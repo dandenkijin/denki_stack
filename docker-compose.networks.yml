@@ -1,9 +1,8 @@
 #version: "3"
 networks:
-  #srv:
-  #  name: srv
+  srv:
+    name: srv
   proxy: 
-    external: true
     name: proxy
     driver: bridge
     ipam:

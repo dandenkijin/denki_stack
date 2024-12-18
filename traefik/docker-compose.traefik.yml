@@ -5,10 +5,11 @@ services:
     command:
       - --metrics.prometheus=true
       - --metrics.prometheus.addrouterslabels=true
-      - --entrypoints.https=true
-      - --entrypoints.https.address=:443
+      #- --entrypoints.https=true
+      #- --entrypoints.https.address=:443
     restart: always
     networks:
+      srv:
       proxy:
         ipv4_address: 172.20.0.2
     ports:
