@@ -1,4 +1,5 @@
 traefik/letsencrypt/
 nginx/logs/
+nginx/conf/www/
 stalwart/opt/stalwart-mail/etc/certs/
 .env
