@@ -11,11 +11,6 @@ accessLog:
   format: common
 
 api:
-  # Dashboard
-  #
-  # Optional
-  # Default: true
-  #
   dashboard: true
 
 providers:
@@ -24,7 +19,7 @@ providers:
     network: proxy
   file:
     # watch for dynamic configuration changes
-    directory: /etc/traefik
+    directory: /etc/traefik/dynamic_conf
     watch: true
 
 entryPoints:
@@ -42,6 +37,12 @@ entryPoints:
     http:
       tls:
         certResolver: le
+  smtp:
+    address: :25
+    proxyProtocol:
+      trustedIPs:
+        - 172.20.0.2
+        - 172.20.0.5
   esmtp:
     address: :465
     proxyProtocol:
@@ -61,34 +62,7 @@ entryPoints:
         - 172.20.0.2
         - 172.20.0.5
 
-http:
-  routers:
-    prometheus-router:
-      rule: "PathPrefix(`/prometheus`)"
-      service: prometheus
-      entryPoints:
-        - web
-    grafana-router:
-      rule: "PathPrefix(`/grafana`)"
-      service: grafana
-      entryPoints:
-        - web
-    #api:
-    #  rule: "PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
-    #  service: api@internal
-    #  entryPoints:
-    #    - web
-  services:
-    prometheus:
-      loadBalancer:
-        servers:
-          - url: "http://127.0.0.1:9090/"
-    grafana:
-      loadBalancer:
-        servers:
-          - url: "http://127.0.0.1:3000/"
-https:
-
+# MOVED TO dynamic_conf/tls.yml but must be in static config?
 certificatesResolvers:
   le:
     acme:
@@ -96,5 +70,3 @@ certificatesResolvers:
       email: "dan@denkijin.com"
       storage: "/letsencrypt/acme.json"
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
-      #dnsChallenge:
-      #  provider: cloudflare

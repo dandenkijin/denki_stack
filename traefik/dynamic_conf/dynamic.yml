@@ -1,0 +1,22 @@
+http:
+  routers:
+    prometheus-router:
+      rule: "PathPrefix(`/prometheus`)"
+      service: prometheus
+      entryPoints:
+        - web
+    grafana-router:
+      rule: "PathPrefix(`/grafana`)"
+      service: grafana
+      entryPoints:
+        - web
+  services:
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:9090/"
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:3000/"
+

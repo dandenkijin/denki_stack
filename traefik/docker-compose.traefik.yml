@@ -5,38 +5,38 @@ services:
     command:
       - --metrics.prometheus=true
       - --metrics.prometheus.addrouterslabels=true
-      #- --entrypoints.https=true
-      #- --entrypoints.https.address=:443
     restart: always
     networks:
       srv:
       proxy:
         ipv4_address: 172.20.0.2
     ports:
+      - 25:25
       - 80:80
       - 443:443
       - 465:465
       - 993:993
-      - 1337:1337
       - 4190:4190
-      #- 8080:8080
     volumes:
       #- /etc/localtime:/etc/localtime:ro
       - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./letsencrypt/certs:/etc/traefik/certs
+      - ./dynamic_conf:/etc/traefik/dynamic_conf
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/letsencrypt
     labels:
       - traefik.enable=true
       - traefik.http.routers.api.entrypoints=websecure
       - traefik.http.routers.api.rule=Host(`traefik.denkijin.com`) # && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))# DOMAINNAME
+      #- traefik.http.routers.api.rule=ClientIP(`73.152.132.120`)
       - traefik.http.routers.api.service=api@internal
       - traefik.http.routers.api.middlewares=auth
       - traefik.http.middlewares.auth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/  # not sure, bcrypt??
       - traefik.http.services.api.loadbalancer.server.port=1337
 
-  ## BROKEN?? . . . seems to function, other than hook.sh being a directory rather than a script?
+  ## removed "hook.sh" as not used https://github.com/ldez/traefik-certs-dumper?tab=readme-ov-file#hook 
   traefik-certs-dumper:
-    image: ldez/traefik-certs-dumper:v2.8.3
+    image: ldez/traefik-certs-dumper:v2.9.3
     depends_on:
       - traefik
     container_name: traefik-certs-dumper
@@ -48,17 +48,11 @@ services:
       ; done
       && traefik-certs-dumper file --version v2 --watch
         --source /data/acme.json --dest /data/certs
-        --post-hook "sh /hook.sh"'
+        --domain-subdir=true --crt-ext=.pem --key-ext=.pem'
     labels:
       traefik.enable: false
     volumes:
       - ./letsencrypt:/data
-      - ./hook.sh:/hook.sh
-#  certdumper:
-#    image: ghcr.io/kereis/traefik-certs-dumper:latest
-#    volumes:
-#      - ./letsencrypt:/traefik:ro
-#      - ./letsencrypt/dumped:/output:rw
   whoami:
     image: traefik/whoami:v1.8.1
     networks:
