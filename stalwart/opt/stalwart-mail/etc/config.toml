@@ -7,6 +7,7 @@ cluster.node-id = 1
 directory.internal.store = "rocksdb"
 directory.internal.type = "internal"
 lookup.default.hostname = "mail.denkijin.com"
+server.allowed-ip = "73.152.132.120"
 server.http.permissive-cors = false
 server.http.url = "protocol + '://' + key_get('default', 'hostname') + ':' + local_port"
 server.http.use-x-forwarded = false

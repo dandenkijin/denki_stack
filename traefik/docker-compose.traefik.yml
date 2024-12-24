@@ -11,14 +11,14 @@ services:
       proxy:
         ipv4_address: 172.20.0.2
     ports:
-      - 25:25
+      #- 8025:25/tcp
       - 80:80
       - 443:443
       - 465:465
       - 993:993
       - 4190:4190
     volumes:
-      #- /etc/localtime:/etc/localtime:ro
+      - /etc/localtime:/etc/localtime:ro
       - ./traefik.yml:/etc/traefik/traefik.yml
       - ./letsencrypt/certs:/etc/traefik/certs
       - ./dynamic_conf:/etc/traefik/dynamic_conf
@@ -28,7 +28,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.api.entrypoints=websecure
       - traefik.http.routers.api.rule=Host(`traefik.denkijin.com`) # && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))# DOMAINNAME
-      #- traefik.http.routers.api.rule=ClientIP(`73.152.132.120`)
+      # - traefik.http.routers.api.rule=ClientIP(`73.152.132.120`)
       - traefik.http.routers.api.service=api@internal
       - traefik.http.routers.api.middlewares=auth
       - traefik.http.middlewares.auth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/  # not sure, bcrypt??
@@ -55,8 +55,11 @@ services:
       - ./letsencrypt:/data
   whoami:
     image: traefik/whoami:v1.8.1
+    depends_on:
+      - traefik
     networks:
-      - proxy
+      proxy:
+          ipv4_address: 172.20.0.7
     labels:
       - traefik.enable=true
       - traefik.http.routers.mywhoami.rule=Host(`whoami.denkijin.com`) #DOMAINNAME
