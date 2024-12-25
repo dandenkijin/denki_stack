@@ -11,6 +11,15 @@ services:
       #- /apps/prometheus/configs/prometheus.yaml:/etc/prometheus/prometheus.yaml
       - /prometheus:/etc/prometheus/prometheus.yaml
       - prom_data:/prometheus
+  digitalocean_exporter:
+    image: metalmatze/digitalocean_exporter:0.6.1
+    environment:
+      - "-do.token=${DIGITALOCEAN_TOKEN}"
+    restart: always
+    ports:
+      - "9212:9212"
+    labels:
+      - --traefik.enable=false
 volumes:
   prom_data:
     name: prom_data
