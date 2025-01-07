@@ -38,7 +38,7 @@ entryPoints:
       tls:
         certResolver: le
   smtp:
-    address: :25
+    address: :2525
     proxyProtocol:
       trustedIPs:
         - 172.20.0.2

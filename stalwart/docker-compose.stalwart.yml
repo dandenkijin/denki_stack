@@ -25,13 +25,14 @@ services:
       #- certs:/data/certs:ro
       #- certs:certs:ro
       #- /logs:/logs/
-      #- ../traefik/letsencrypt/certs:/opt/stalwart-mail/etc/certs
+      - ../traefik/letsencrypt/certs:/opt/stalwart-mail/etc/certs
     labels:
       - traefik.enable=true
       #- traefik.http.routers.whoami.rule=Host(`mail.denkijin.com`)
       #- traefik.http.routers.whoami.entrypoints=web
       
-      - traefik.http.routers.mailserver.rule=Host(`mail.denkijin.com`) || Host(`autodiscover.denkijin.com`) || Host(`autoconfig.denkijin.com`) || Host(`mta-sts.denkijin.com`)
+      #- traefik.http.routers.mailserver.rule=Host(`mail.denkijin.com`) || Host(`autodiscover.denkijin.com`) || Host(`autoconfig.denkijin.com`) || Host(`mta-sts.denkijin.com`)
+      - traefik.http.routers.mailserver.rule=Host(`mail.denkijin.com`) || Host(`autodiscover.denkijin.com`) || Host(`autoconfig.denkijin.com`)
       - traefik.http.routers.mailserver.entrypoints=websecure
       - traefik.http.routers.mailserver.service=mailserver
       - traefik.http.services.mailserver.loadbalancer.server.port=8080
@@ -39,7 +40,7 @@ services:
       - traefik.tcp.routers.smtp.rule=HostSNI(`*`)
       - traefik.tcp.routers.smtp.entrypoints=smtp
       - traefik.tcp.routers.smtp.service=smtp
-      - traefik.tcp.services.smtp.loadbalancer.server.port=25
+      - traefik.tcp.services.smtp.loadbalancer.server.port=2525
       - traefik.tcp.services.smtp.loadbalancer.proxyProtocol.version=2
 
       - traefik.tcp.routers.jmap.rule=HostSNI(`mail.denkijin.com`)
